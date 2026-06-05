@@ -1,1 +1,2 @@
-export const INITIAL_BOARD_STATE = '';
+export const INITIAL_BOARD_STATE =
+  'RHBKQBHRPPPPPPPPsssssssssssssssssssssssssssssssspppppppprhbkqbhr';
