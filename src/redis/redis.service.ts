@@ -6,7 +6,7 @@ import Redis from 'ioredis';
 export class RedisService implements OnModuleDestroy {
   private publisher: Redis;
   private subscriber: Redis;
-  private callbackRegistry: Map<string, Array<(message: string) => void>>;
+  private callbackRegistry: Map<string, Array<(message: string) => void>> = new Map();
 
   constructor(private configService: ConfigService) {
     this.publisher = new Redis({
