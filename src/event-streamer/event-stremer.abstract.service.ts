@@ -1,8 +1,6 @@
 import { Observable } from 'rxjs';
 
-export abstract class BaseEventStreamer {
-  abstract getStream(
-    id: string,
-  ): Observable<string> | Promise<Observable<string>>;
-  abstract sendEvent(id: string, message: string): void | Promise<void>;
+export abstract class BaseEventStreamer<T> {
+  abstract getStream(id: string): Promise<Observable<T>>;
+  abstract sendEvent(id: string, message: T): Promise<void>;
 }

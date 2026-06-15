@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GamesModule } from './games/games.module';
 import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { JwtModule } from '@nestjs/jwt';
         secret: configService.get<string>('JWT_SECRET'),
       }),
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

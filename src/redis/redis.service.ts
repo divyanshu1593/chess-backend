@@ -6,7 +6,8 @@ import Redis from 'ioredis';
 export class RedisService implements OnModuleDestroy {
   private publisher: Redis;
   private subscriber: Redis;
-  private callbackRegistry: Map<string, Array<(message: string) => void>> = new Map();
+  private callbackRegistry: Array<(channel: string, message: string) => void> =
+    [];
 
   constructor(private configService: ConfigService) {
     this.publisher = new Redis({
@@ -20,10 +21,8 @@ export class RedisService implements OnModuleDestroy {
     });
 
     this.subscriber.on('message', (channel, message) => {
-      if (!this.callbackRegistry.has(channel)) return;
-
-      for (const callback of this.callbackRegistry.get(channel)!) {
-        callback(message);
+      for (const callback of this.callbackRegistry) {
+        callback(channel, message);
       }
     });
   }
@@ -37,12 +36,11 @@ export class RedisService implements OnModuleDestroy {
     await this.publisher.publish(channel, message);
   }
 
-  async subscribe(channel: string, callback: (message: string) => void) {
-    if (!this.callbackRegistry.has(channel)) {
-      this.callbackRegistry.set(channel, []);
-    }
-
-    this.callbackRegistry.get(channel)!.push(callback);
+  async subscribe(channel: string) {
     await this.subscriber.subscribe(channel);
+  }
+
+  listen(callback: (channel: string, message: string) => void) {
+    this.callbackRegistry.push(callback);
   }
 }
