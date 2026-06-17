@@ -7,6 +7,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ErrorMessages } from 'src/common/enums/error-messages.enum';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -37,6 +38,16 @@ async function bootstrap() {
       }
     },
   });
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Chess Backend')
+    .setDescription('This is swagger for chess backend')
+    .setVersion('1.0')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api', app, document);
+
   await app.listen(process.env.PORT ?? 3000);
 }
 void bootstrap();
