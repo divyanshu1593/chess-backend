@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { BaseEventStreamer } from './event-stremer.abstract.service';
 import { RedisService } from '../redis/redis.service';
-import { Observable, ReplaySubject } from 'rxjs';
+import { catchError, Observable, ReplaySubject, throwError } from 'rxjs';
 import { withSubscriberLimit } from 'src/common/utils/limited-subject';
+import { SubscriberLimitReachedError } from 'src/common/errors/subscriber-limit-reached.error';
+import { MaxSubscriberReachedError } from 'src/event-streamer/errors/subscriber-limit-reached.error';
 
 @Injectable()
 export class DistributedEventStreamer<T> implements BaseEventStreamer<T> {
@@ -30,7 +32,15 @@ export class DistributedEventStreamer<T> implements BaseEventStreamer<T> {
       this.subjectRegistry.set(id, subject$);
     }
 
-    return subject$.asObservable();
+    return subject$.asObservable().pipe(
+      catchError((error: Error) => {
+        if (error instanceof SubscriberLimitReachedError) {
+          return throwError(() => new MaxSubscriberReachedError(error.message));
+        }
+
+        return throwError(() => error);
+      }),
+    );
   }
 
   async sendEvent(id: string, message: T): Promise<void> {

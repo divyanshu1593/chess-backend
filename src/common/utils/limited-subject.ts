@@ -1,5 +1,5 @@
-import { Subject, Subscription } from 'rxjs';
-import { ErrorMessages } from 'src/common/enums/error-messages.enum';
+import { Subject, Subscription, throwError } from 'rxjs';
+import { SubscriberLimitReachedError } from 'src/common/errors/subscriber-limit-reached.error';
 
 export const withSubscriberLimit = <
   S extends new (...args: any[]) => Subject<any>,
@@ -12,16 +12,18 @@ export const withSubscriberLimit = <
 
     override subscribe(...args: any[]): Subscription {
       if (this.subscriberCount >= limit) {
-        throw new Error(ErrorMessages.SUBSCRIBER_LIMIT_REACHED);
+        return throwError(() => new SubscriberLimitReachedError()).subscribe(
+          ...args,
+        );
       }
 
       this.subscriberCount += 1;
-      return super.subscribe(...args);
-    }
+      const subscription = super.subscribe(...args);
+      subscription.add(() => {
+        this.subscriberCount -= 1;
+      });
 
-    override unsubscribe(): void {
-      this.subscriberCount -= 1;
-      super.unsubscribe();
+      return subscription;
     }
   };
 };

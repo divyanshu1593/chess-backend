@@ -12,6 +12,7 @@ import { Game } from './entities/game.entity';
 import { DataSource, EntityManager } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ErrorMessages } from 'src/games/enums/error-messages.enum';
+import { PlayerJwt } from 'src/games/types/types';
 
 @Injectable()
 export class GamesService {
@@ -22,13 +23,21 @@ export class GamesService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async getObservableStream(id: Game['id']) {
-    const isGameInProgress = await this.gamesRepository.isGameInProgress(id);
+  generateIdFromGameInfo(gameInfo: PlayerJwt) {
+    return `${gameInfo.id}_${gameInfo.color}`;
+  }
+
+  async getObservableStream(gameInfo: PlayerJwt) {
+    const isGameInProgress = await this.gamesRepository.isGameInProgress(
+      gameInfo.id,
+    );
     if (!isGameInProgress) {
       throw new NotFoundException(ErrorMessages.IN_PROGRESS_GAME_NOT_FOUND);
     }
 
-    return await this.eventStreamer.getStream(String(id));
+    return await this.eventStreamer.getStream(
+      this.generateIdFromGameInfo(gameInfo),
+    );
   }
 
   async handleGamePlayRequest() {
