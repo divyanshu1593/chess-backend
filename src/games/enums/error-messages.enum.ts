@@ -12,4 +12,5 @@ export enum ErrorMessages {
   MOVE_OUT_OF_RANGE = `This move is out of range`,
   CANNOT_CAPTURE_OWN_PIECE = `Cannot capture own piece`,
   KING_WILL_BE_CAPTURED = `Cannot make this move otherwise king can be captured in next move`,
+  PROMOTION_PIECE_NOT_PROVIDED = `Pawn is moving to last rank, a promotion piece must be provided`,
 }

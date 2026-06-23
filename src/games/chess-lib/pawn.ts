@@ -1,5 +1,7 @@
 import { Board } from 'src/games/chess-lib/board';
 import { ChessPiece } from 'src/games/chess-lib/chess-piece';
+import { ErrorMessages } from 'src/games/enums/error-messages.enum';
+import { InvalidMoveError } from 'src/games/errors/invalid-move.error';
 import { PieceNotFoundError } from 'src/games/errors/piece-not-found.error';
 import { BoardState, ChessPieceRange, Move } from 'src/games/types/types';
 
@@ -99,6 +101,17 @@ export class Pawn extends ChessPiece {
     const { direction, magnitude } = this.getMagnitudeAndDirection(move);
     if (magnitude[1] && this.getPieceFromCords(boardState, to) === null) {
       boardState[from[0]][from[1] + direction[1]] = null;
+    }
+
+    const lastRank = this.isWhite ? 0 : 7;
+    if (to[0] === lastRank) {
+      if (!move.promoteTo) {
+        throw new InvalidMoveError(
+          Board.convertToStringRepresentation(boardState),
+          move,
+          ErrorMessages.PROMOTION_PIECE_NOT_PROVIDED,
+        );
+      }
     }
   }
 }
